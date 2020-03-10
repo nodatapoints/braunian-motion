@@ -1,23 +1,13 @@
-#include <iostream>
-#include <vector>
-#include <glpk.h>
+#include "matching.hpp"
 
-#include <opencv2/opencv.hpp>
+static const float max_r = 50;
+static const float unmatchedPenalty = 1e3;
 
-const float max_r = 50;
-const float unmatchedPenalty = 5000;
-
-using Point = cv::Point2f;
-
-float distance(const Point &a, const Point &b) {
+static float distance(const Point &a, const Point &b) {
     return cv::norm(b-a);
 }
 
-struct Edge {
-    int in, out;
-};
-
-std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &inNodes, const std::vector<Point> &outNodes) {
+static std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &inNodes, const std::vector<Point> &outNodes) {
     /*
      * Populates the linear problem lp with an equivalent bipartite
      * matching problem given by two sets of points in space.
@@ -32,16 +22,15 @@ std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &inNodes,
     // each row represents one constraint corresponding to one node
     glp_add_rows(lp, u+v);
 
-    // allow each vertex in U and V to be incident to one edge at most
-    // by constraining 0 <= x_1 ... x_(u+v) <= 1
+    // allow each vertex in U and V to be incident eactly one edge
     for (int i = 1; i <= u+v; ++i)
-        glp_set_row_bnds(lp, i, GLP_FX, 0, 1);
+        glp_set_row_bnds(lp, i, GLP_FX, 1, 1);
 
     int val, col;
     float dist;
 
     // first element is dummy because glpk begins counting at 1
-    const std::vector valArray{0.0, 1.0, 1.0};
+    const std::vector<double> valArray{0.0, 1.0, 1.0};
     std::vector<int> indArray;
 
     std::vector<Edge> edges;
@@ -51,7 +40,7 @@ std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &inNodes,
 
             // only use edge when its short enough
             if ((val = (dist < max_r) ? 1 : 0)) {
-                edges.emplace_back(i, j);
+                edges.push_back({i, j});
 
                 col = glp_add_cols(lp, 1);
 
@@ -63,7 +52,7 @@ std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &inNodes,
                 glp_set_obj_coef(lp, col, dist);
 
                 // constrain edge like a binary value
-                glp_set_col_bnds(lp, col, GLP_FX, 0, 1);
+                glp_set_col_bnds(lp, col, GLP_DB, 0, 1);
             }
         }
     }
@@ -88,14 +77,14 @@ std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &inNodes,
     return edges;
 }
 
-std::vector<Edge> bipartiteToLP(const std::vector<Point> &inNodes, const std::vector<Point> &outNodes) {
+std::vector<Edge> solveBipartite(const std::vector<Point> &inNodes, const std::vector<Point> &outNodes) {
     glp_prob *lp = glp_create_prob();
     const auto edges = bipartiteToLP(lp, inNodes, outNodes);
 
     auto r = glp_simplex(lp, nullptr);
-    if (r != 0) {
-        std::cerr << "simplex failed: " << r << std::endl;
-    }
+    if (r != 0)
+        throw std::runtime_error("simplex failed");
+
 
     std::vector<Edge> matchedEdges;
     for (int i = 0; i < edges.size(); ++i)

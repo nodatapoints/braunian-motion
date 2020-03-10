@@ -2,11 +2,10 @@
 #include <vector>
 #include <iostream>
 
-cv::SimpleBlobDetector::Params params;
+static cv::Ptr<cv::SimpleBlobDetector> detector;
 
-std::vector<cv::Point2f> findParticles(const cv::Mat &image) {
+static std::vector<cv::Point2f> findParticles(const cv::Mat &image) {
     std::vector<cv::KeyPoint> keypoints;
-    auto detector = cv::SimpleBlobDetector::create(params);
 
     detector->detect(image, keypoints);
     
@@ -17,7 +16,9 @@ std::vector<cv::Point2f> findParticles(const cv::Mat &image) {
     return points;
 }
 
-int main() {
+void initCV() {
+    cv::SimpleBlobDetector::Params params;
+
     params.filterByArea = true;
     params.minArea = 20;
 
@@ -33,14 +34,14 @@ int main() {
     params.filterByInertia = true;
     params.minInertiaRatio = 0.01;
 
+    detector = cv::SimpleBlobDetector::create(params);
+}
 
-    char filename[32];
-    for (int i = 1; i < 79; ++i) {
-        std::sprintf(filename, "img/%02d.png", i);
-        std::cout << "reading " << filename << ": ";
-        auto image = cv::imread(filename, cv::IMREAD_GRAYSCALE);
-        std::cout << "processing ...";
-        auto particles = findParticles(image);
-        std::cout << " done. found " << particles.size() << " particles" << std::endl;
-    }
+std::vector<cv::Point2f> getFrameParticles(const char filename[]) {
+    std::cout << "reading " << filename << ": ";
+    auto image = cv::imread(filename, cv::IMREAD_GRAYSCALE);
+    std::cout << "processing ...";
+    auto particles = findParticles(image);
+    std::cout << " done. found " << particles.size() << " particles" << std::endl;
+    return particles;
 }
