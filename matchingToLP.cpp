@@ -1,5 +1,6 @@
 #include "matching.hpp"
 
+static const float min_r = .5;
 static const float max_r = 50;
 static const float unmatchedPenalty = 80;
 
@@ -26,8 +27,7 @@ static std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &i
     for (int i = 1; i <= u+v; ++i)
         glp_set_row_bnds(lp, i, GLP_FX, 1, 1);
 
-    int val, col;
-    float dist;
+    int col; float dist;
 
     // first element is dummy because glpk begins counting at 1
     const std::vector<double> valArray{0.0, 1.0, 1.0};
@@ -39,7 +39,7 @@ static std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &i
             dist = distance(inNodes.at(i), outNodes.at(j));
 
             // only use edge when its short enough
-            if ((val = (dist < max_r) ? 1 : 0)) {
+            if ((min_r < dist) && (dist < max_r)) {
                 edges.push_back({i, j});
 
                 col = glp_add_cols(lp, 1);
@@ -81,7 +81,12 @@ std::vector<Edge> solveBipartite(const std::vector<Point> &inNodes, const std::v
     glp_prob *lp = glp_create_prob();
     const auto edges = bipartiteToLP(lp, inNodes, outNodes);
 
-    auto r = glp_simplex(lp, nullptr);
+    glp_smcp params;
+    glp_init_smcp(&params);
+    params.msg_lev = GLP_MSG_ERR;
+
+    std::cout << "solving ...";
+    auto r = glp_simplex(lp, &params);
     if (r != 0)
         throw std::runtime_error("simplex failed");
 
@@ -93,5 +98,8 @@ std::vector<Edge> solveBipartite(const std::vector<Point> &inNodes, const std::v
             matchedEdges.push_back(std::move(edges.at(i)));
 
     glp_delete_prob(lp);
+
+    std::cout << " done. matched " << matchedEdges.size() << " edges" <<std::endl;
+    std::cout << std::endl;
     return matchedEdges;
 }

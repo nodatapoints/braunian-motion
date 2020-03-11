@@ -20,11 +20,11 @@ void initCV() {
     cv::SimpleBlobDetector::Params params;
 
     params.minThreshold = 0;
-    params.maxThreshold = .5 * 255;
+    params.maxThreshold = .6 * 255;
     params.thresholdStep = 3;
 
     params.filterByArea = true;
-    params.minArea = 10;
+    params.minArea = 30;
 
     params.filterByCircularity = true;
     params.minCircularity = 0.1;

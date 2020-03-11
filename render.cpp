@@ -12,8 +12,8 @@ static sf::RenderWindow window;
 static sf::RenderTexture lineBuffer;
 static sf::ContextSettings settings;
 
-static const sf::Color circleColor{0, 51, 204, 150};
-static const sf::Color lineColor{0, 51, 204};
+static const sf::Color circleColor{255, 77, 77};
+static const sf::Color lineColor{255, 77, 77};
 
 const int width = 1280, height = 1024;
 
