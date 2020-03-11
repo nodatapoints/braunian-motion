@@ -2,3 +2,4 @@ app
 *.o
 img/*
 *.swp
+trueimg/*

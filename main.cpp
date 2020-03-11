@@ -10,8 +10,8 @@ int main() {
 
     std::vector<std::vector<cv::Point2f>> particleByFrame;
 
-    for (int i = 1; i <= 78; ++i) {
-        std::sprintf(filename, "img/%02d.png", i);
+    for (int i = 1; i <= 77; ++i) {
+        std::sprintf(filename, "trueimg/%02d.png", i);
 
         const auto points = getFrameParticles(filename);
         setBackground(filename);

@@ -19,17 +19,18 @@ static std::vector<cv::Point2f> findParticles(const cv::Mat &image) {
 void initCV() {
     cv::SimpleBlobDetector::Params params;
 
-    params.filterByArea = true;
-    params.minArea = 20;
+    params.minThreshold = 0;
+    params.maxThreshold = .5 * 255;
+    params.thresholdStep = 3;
 
-    params.filterByCircularity = true;
-    params.minCircularity = 0.1;
+    params.filterByArea = true;
+    params.minArea = 10;
 
     params.filterByCircularity = true;
     params.minCircularity = 0.1;
 
     params.filterByConvexity = true;
-    params.minConvexity = 0.87;
+    params.minConvexity = 0.5;
 
     params.filterByInertia = true;
     params.minInertiaRatio = 0.01;

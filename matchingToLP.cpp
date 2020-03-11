@@ -1,7 +1,7 @@
 #include "matching.hpp"
 
 static const float max_r = 50;
-static const float unmatchedPenalty = 1e3;
+static const float unmatchedPenalty = 80;
 
 static float distance(const Point &a, const Point &b) {
     return cv::norm(b-a);
