@@ -1,6 +1,7 @@
 #include "render.hpp"
 #include "blob.hpp"
 #include "matching.hpp"
+#include "tracer.hpp"
 
 #include <fstream>
 
@@ -18,6 +19,8 @@ int main() {
 
     // vector of particle vectors for each frame
     std::vector<std::vector<cv::Point2f>> particleByFrame;
+
+    Tracer tracer{};
 
     // another magic number: 77
     // hardcoded iteration over all image files
@@ -38,6 +41,8 @@ int main() {
             // match them to the particles of previous frame
             const auto matching = solveBipartite(previous, points);
 
+            tracer.updateTraces(previous, points, matching);
+
             // draw edges and log to outfile
             for (const auto &edge : matching) {
                 const auto &a = previous.at(edge.in), &b = points.at(edge.out);
@@ -50,5 +55,8 @@ int main() {
 
         display();
     }
+    tracer.terminateTraces();
+    tracer.dumpToFile("traces.dat");
+
     outfile.close();
 }

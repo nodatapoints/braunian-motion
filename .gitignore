@@ -4,3 +4,4 @@ img/*
 *.swp
 trueimg/*
 output.dat
+traces.dat
