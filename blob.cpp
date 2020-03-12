@@ -39,7 +39,7 @@ void initCV() {
 }
 
 std::vector<cv::Point2f> getFrameParticles(const char filename[]) {
-    std::cout << "reading " << filename << ": ";
+    std::cout << "reading " << filename << std::endl;
     auto image = cv::imread(filename, cv::IMREAD_GRAYSCALE);
     std::cout << "processing ...";
     auto particles = findParticles(image);

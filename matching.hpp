@@ -12,5 +12,5 @@ struct Edge {
     int in, out;
 };
 
-
 std::vector<Edge> solveBipartite(const std::vector<Point> &inNodes, const std::vector<Point> &outNodes);
+void setPenalty(float value);

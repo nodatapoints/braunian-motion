@@ -2,7 +2,12 @@
 
 static const float min_r = .5;
 static const float max_r = 50;
-static const float unmatchedPenalty = 80;
+
+static float unmatchedPenalty = 50;
+
+void setPenalty(float value) {
+    unmatchedPenalty = value;
+}
 
 static float distance(const Point &a, const Point &b) {
     return cv::norm(b-a);
@@ -13,7 +18,8 @@ static std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &i
      * Populates the linear problem lp with an equivalent bipartite
      * matching problem given by two sets of points in space.
      *
-     * Returns a vector of index-pairs representing all edges of the matching.
+     * Returns a vector of index-pairs representing *all* edges that were
+     * considered for matching.
      */
     const int u = inNodes.size(), v = outNodes.size();
 
@@ -69,7 +75,7 @@ static std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &i
         glp_set_obj_coef(lp, col, unmatchedPenalty);
 
         // constrain edge like a binary value
-        glp_set_col_bnds(lp, col, GLP_FX, 0, 1);
+        glp_set_col_bnds(lp, col, GLP_DB, 0, 1);
         ++indArray.at(1);
         ++col;
     }
@@ -78,12 +84,16 @@ static std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &i
 }
 
 std::vector<Edge> solveBipartite(const std::vector<Point> &inNodes, const std::vector<Point> &outNodes) {
+    /* Initializes LP problem and applies the previous function.
+     *
+     * This returns a vector of all actual edges of the resulting matching.
+     */
     glp_prob *lp = glp_create_prob();
     const auto edges = bipartiteToLP(lp, inNodes, outNodes);
 
     glp_smcp params;
     glp_init_smcp(&params);
-    params.msg_lev = GLP_MSG_ERR;
+    params.msg_lev = GLP_MSG_ERR; // be quiet unless you have to say something
 
     std::cout << "solving ...";
     auto r = glp_simplex(lp, &params);
@@ -93,13 +103,12 @@ std::vector<Edge> solveBipartite(const std::vector<Point> &inNodes, const std::v
 
     std::vector<Edge> matchedEdges;
     for (int i = 0; i < edges.size(); ++i)
-        // logical threshold
+        // logical threshold at which an edge is considered matched
         if (glp_get_col_prim(lp, i+1) > 0.5)
             matchedEdges.push_back(std::move(edges.at(i)));
 
     glp_delete_prob(lp);
 
     std::cout << " done. matched " << matchedEdges.size() << " edges" <<std::endl;
-    std::cout << std::endl;
     return matchedEdges;
 }

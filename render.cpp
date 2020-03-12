@@ -1,5 +1,9 @@
 #include "render.hpp"
 
+/*
+ * Render everything in pretty window.
+ */
+
 static const int radius = 10;
 
 static sf::Sprite bgSprite;
@@ -15,7 +19,8 @@ static sf::ContextSettings settings;
 static const sf::Color circleColor{255, 77, 77};
 static const sf::Color lineColor{255, 77, 77};
 
-const int width = 1280, height = 1024;
+// hardcoded dimensions
+static const int width = 1280, height = 1024;
 
 void initSFML() {
     circle.setRadius(radius);
@@ -26,7 +31,6 @@ void initSFML() {
     settings.depthBits = 24;
     settings.antialiasingLevel = 5;
 
-    // hardcoded dimensions
     window.create(sf::VideoMode(width, height), "[[float]] stuff", sf::Style::Default, settings);
     lineBuffer.create(width, height);
     lineBuffer.setSmooth(true);

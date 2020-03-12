@@ -18,6 +18,6 @@ matchingToLP.o: matchingToLP.cpp matching.hpp
 	${GXX} -c $<
 
 clean:
-	rm -rf *.o app
+	rm -rvf *.o app
 
 .PHONY: clean
