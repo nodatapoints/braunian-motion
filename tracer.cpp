@@ -13,17 +13,19 @@ static int getMatched(const std::vector<Edge> &edges, const Trace &trace) {
 
 void Tracer::updateTraces(const std::vector<Point> &inNodes, const std::vector<Point> &outNodes, const std::vector<Edge> &edges) {
     std::vector wasMatched(inNodes.size(), false);
-    for (auto it = activeTraces.begin(); it != activeTraces.end(); ++it) {
+    for (auto it = activeTraces.begin(); it != activeTraces.end();) {
+        wasMatched.at(it->last_i) = true;
         int outIndex = getMatched(edges, *it);
+
         if (outIndex < 0) {
             // close trace if no edge was found
             traces.push_back(std::move(*it));
             it = activeTraces.erase(it);
         } else {
             // when edge is fount extend trace
-            wasMatched.at(it->last_i) = true;
             it->points.push_back(outNodes.at(outIndex));
             it->last_i = outIndex;
+            ++it;
         }
     }
 
