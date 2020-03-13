@@ -6,6 +6,11 @@
 struct Trace {
     std::vector<Point> points;
     int last_i;
+
+    Trace() = default;
+    Trace(std::vector<Point> points, int last_i);
+    Trace(const Trace&) = default;
+    Trace(Trace &&trace) = default;
 };
 
 class Tracer {

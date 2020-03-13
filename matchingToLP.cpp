@@ -5,6 +5,9 @@ static const float max_r = 50;
 
 static float unmatchedPenalty = 50;
 
+Edge::Edge(int i, int o) : in(i), out(o) {};
+
+
 void setPenalty(float value) {
     unmatchedPenalty = value;
 }
@@ -46,7 +49,7 @@ static std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &i
 
             // only use edge when its short enough
             if ((min_r < dist) && (dist < max_r)) {
-                edges.push_back({i, j});
+                edges.emplace_back(i, j);
 
                 col = glp_add_cols(lp, 1);
 
@@ -105,7 +108,7 @@ std::vector<Edge> solveBipartite(const std::vector<Point> &inNodes, const std::v
     for (int i = 0; i < edges.size(); ++i)
         // logical threshold at which an edge is considered matched
         if (glp_get_col_prim(lp, i+1) > 0.5)
-            matchedEdges.push_back(std::move(edges.at(i)));
+            matchedEdges.emplace_back(std::move(edges.at(i)));
 
     glp_delete_prob(lp);
 
