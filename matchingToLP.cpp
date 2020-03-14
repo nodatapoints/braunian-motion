@@ -1,22 +1,18 @@
 #include "matching.hpp"
 
-static const float min_r = .5;
-static const float max_r = 50;
+namespace {  // static linkage
+const float min_r = .5;
+const float max_r = 50;
 
-static float unmatchedPenalty = 50;
-
-Edge::Edge(int i, int o) : in(i), out(o) {};
+float unmatchedPenalty = 50;
 
 
-void setPenalty(float value) {
-    unmatchedPenalty = value;
-}
 
-static float distance(const Point &a, const Point &b) {
+float distance(const Point &a, const Point &b) {
     return cv::norm(b-a);
 }
 
-static std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &inNodes, const std::vector<Point> &outNodes) {
+std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &inNodes, const std::vector<Point> &outNodes) {
     /*
      * Populates the linear problem lp with an equivalent bipartite
      * matching problem given by two sets of points in space.
@@ -85,6 +81,7 @@ static std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &i
 
     return edges;
 }
+} // end static linkage
 
 std::vector<Edge> solveBipartite(const std::vector<Point> &inNodes, const std::vector<Point> &outNodes) {
     /* Initializes LP problem and applies the previous function.
@@ -115,3 +112,10 @@ std::vector<Edge> solveBipartite(const std::vector<Point> &inNodes, const std::v
     std::cout << " done. matched " << matchedEdges.size() << " edges" <<std::endl;
     return matchedEdges;
 }
+
+Edge::Edge(int i, int o) : in(i), out(o) {};
+
+void setPenalty(float value) {
+    unmatchedPenalty = value;
+}
+

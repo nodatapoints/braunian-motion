@@ -3,24 +3,25 @@
 /*
  * Render everything in pretty window.
  */
+namespace {
+    const int radius = 10;
 
-static const int radius = 10;
+    sf::Sprite bgSprite;
+    sf::Texture bgTexture;
 
-static sf::Sprite bgSprite;
-static sf::Texture bgTexture;
+    sf::CircleShape circle;
+    sf::VertexArray line{sf::Lines, 2};
 
-static sf::CircleShape circle;
-static sf::VertexArray line{sf::Lines, 2};
+    sf::RenderWindow window;
+    sf::RenderTexture lineBuffer;
+    sf::ContextSettings settings;
 
-static sf::RenderWindow window;
-static sf::RenderTexture lineBuffer;
-static sf::ContextSettings settings;
+    const sf::Color circleColor{255, 77, 77};
+    const sf::Color lineColor{255, 77, 77};
 
-static const sf::Color circleColor{255, 77, 77};
-static const sf::Color lineColor{255, 77, 77};
-
-// hardcoded dimensions
-static const int width = 1280, height = 1024;
+    // hardcoded dimensions
+    const int width = 1280, height = 1024;
+}
 
 void initSFML() {
     circle.setRadius(radius);

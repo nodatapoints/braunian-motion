@@ -20,7 +20,7 @@ int main() {
     // vector of particle vectors for each frame
     std::vector<std::vector<cv::Point2f>> particleByFrame;
 
-    Tracer tracer{};
+    Tracer tracer;
 
     // another magic number: 77
     // hardcoded iteration over all image files
@@ -51,7 +51,7 @@ int main() {
             }
         }
         // add the particles
-        particleByFrame.push_back(std::move(points));
+        particleByFrame.emplace_back(std::move(points));
 
         display();
     }

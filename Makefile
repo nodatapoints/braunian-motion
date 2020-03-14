@@ -1,4 +1,4 @@
-GXX=g++ -std=c++17
+GXX=g++ -std=c++17 -O3
 LIBS=-lopencv_features2d -lopencv_highgui -lopencv_imgcodecs -lopencv_core \
 	 -lsfml-window -lsfml-graphics -lsfml-system -lglpk -lm
 

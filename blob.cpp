@@ -2,18 +2,20 @@
 #include <vector>
 #include <iostream>
 
-static cv::Ptr<cv::SimpleBlobDetector> detector;
+namespace {
+    cv::Ptr<cv::SimpleBlobDetector> detector;
 
-static std::vector<cv::Point2f> findParticles(const cv::Mat &image) {
-    std::vector<cv::KeyPoint> keypoints;
+    std::vector<cv::Point2f> findParticles(const cv::Mat &image) {
+        std::vector<cv::KeyPoint> keypoints;
 
-    detector->detect(image, keypoints);
-    
-    std::vector<cv::Point2f> points;
-    for (const auto &kp : keypoints)
-        points.push_back(std::move(kp.pt));
+        detector->detect(image, keypoints);
 
-    return points;
+        std::vector<cv::Point2f> points;
+        for (const auto &kp : keypoints)
+            points.emplace_back(std::move(kp.pt));
+
+        return points;
+    }
 }
 
 void initCV() {

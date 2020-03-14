@@ -1,17 +1,19 @@
 #include "tracer.hpp"
 
-Trace::Trace(std::vector<Point> p, int i) : points(std::move(p)), last_i(i) {}
-
-static int getMatched(const std::vector<Edge> &edges, int i) {
+namespace {
+int getMatched(const std::vector<Edge> &edges, int i) {
     for (const auto &e : edges) 
         if (i == e.in) 
             return e.out;
     return -1;
 }
 
-static int getMatched(const std::vector<Edge> &edges, const Trace &trace) {
+int getMatched(const std::vector<Edge> &edges, const Trace &trace) {
     return getMatched(edges, trace.last_i);
 }
+}
+
+Trace::Trace(std::vector<Point> p, int i) : points(std::move(p)), last_i(i) {}
 
 void Tracer::updateTraces(const std::vector<Point> &inNodes, const std::vector<Point> &outNodes, const std::vector<Edge> &edges) {
     std::vector wasMatched(inNodes.size(), false);
