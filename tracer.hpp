@@ -2,13 +2,14 @@
 
 #include "matching.hpp"
 #include <list>
+#include <forward_list>
+#include <unordered_map>
 
 struct Trace {
-    std::vector<Point> points;
-    int last_i;
+    std::forward_list<PointPtr> points;
 
     Trace() = default;
-    Trace(std::vector<Point> points, int last_i);
+    Trace(std::forward_list<PointPtr> p);
     Trace(const Trace&) = default;
     Trace(Trace &&trace) = default;
 };

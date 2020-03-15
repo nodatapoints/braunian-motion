@@ -13,8 +13,6 @@ int main() {
     // rewind file
     outfile.seekp(0);
 
-    setPenalty(25);
-
     char filename[32];
 
     // vector of particle vectors for each frame
@@ -24,7 +22,7 @@ int main() {
 
     // another magic number: 77
     // hardcoded iteration over all image files
-    for (int i = 1; i < 77; ++i) {
+    for (int i = 1; i <= 77; ++i) {
         std::sprintf(filename, "img/%02d.png", i);
 
         // detect particles
@@ -45,7 +43,7 @@ int main() {
 
             // draw edges and log to outfile
             for (const auto &edge : matching) {
-                const auto &a = previous.at(edge.in), &b = points.at(edge.out);
+                const auto &a = *edge.in, &b = *edge.out;
                 outfile << (b.x-a.x) << " " << (b.y-a.y) << std::endl;
                 drawLine(a, b);
             }

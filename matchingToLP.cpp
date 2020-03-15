@@ -4,9 +4,7 @@ namespace {  // static linkage
 const float min_r = .5;
 const float max_r = 50;
 
-float unmatchedPenalty = 50;
-
-
+const float unmatchedPenalty = 25;
 
 float distance(const Point &a, const Point &b) {
     return cv::norm(b-a);
@@ -41,11 +39,12 @@ std::vector<Edge> bipartiteToLP(glp_prob *lp, const std::vector<Point> &inNodes,
     std::vector<Edge> edges;
     for (int i = 0; i < u; ++i) {
         for (int j = 0; j < v; ++j) {
-            dist = distance(inNodes.at(i), outNodes.at(j));
+            auto &a = inNodes.at(i), &b = outNodes.at(j);
+            dist = distance(a, b);
 
             // only use edge when its short enough
             if ((min_r < dist) && (dist < max_r)) {
-                edges.emplace_back(i, j);
+                edges.emplace_back(&a, &b);
 
                 col = glp_add_cols(lp, 1);
 
@@ -113,9 +112,5 @@ std::vector<Edge> solveBipartite(const std::vector<Point> &inNodes, const std::v
     return matchedEdges;
 }
 
-Edge::Edge(int i, int o) : in(i), out(o) {};
-
-void setPenalty(float value) {
-    unmatchedPenalty = value;
-}
+Edge::Edge(PointPtr i, PointPtr o) : in(i), out(o) {};
 

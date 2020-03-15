@@ -1,46 +1,45 @@
 #include "tracer.hpp"
 
 namespace {
-int getMatched(const std::vector<Edge> &edges, int i) {
+PointPtr getMatched(const std::vector<Edge> &edges, PointPtr ptr) {
     for (const auto &e : edges) 
-        if (i == e.in) 
+        if (ptr == e.in) 
             return e.out;
-    return -1;
+    return nullptr;
 }
 
-int getMatched(const std::vector<Edge> &edges, const Trace &trace) {
-    return getMatched(edges, trace.last_i);
+PointPtr getMatched(const std::vector<Edge> &edges, const Trace &trace) {
+    return getMatched(edges, trace.points.front());
 }
 }
 
-Trace::Trace(std::vector<Point> p, int i) : points(std::move(p)), last_i(i) {}
+Trace::Trace(std::forward_list<PointPtr> p) : points(p) {}
 
 void Tracer::updateTraces(const std::vector<Point> &inNodes, const std::vector<Point> &outNodes, const std::vector<Edge> &edges) {
-    std::vector wasMatched(inNodes.size(), false);
+    std::unordered_map<PointPtr, bool> wasMatched;
     for (auto it = activeTraces.begin(); it != activeTraces.end();) {
-        wasMatched.at(it->last_i) = true;
-        int outIndex = getMatched(edges, *it);
+        // addr bodge sry not sry
+        wasMatched[it->points.front()] = true;
+        auto out = getMatched(edges, *it);
 
-        if (outIndex < 0) {
+        if (out) {
             // close trace if no edge was found
             traces.emplace_back(std::move(*it));
             it = activeTraces.erase(it);
         } else {
             // when edge is found extend trace
-            it->points.push_back(outNodes.at(outIndex));
-            it->last_i = outIndex;
+            it->points.emplace_front(std::move(out));
             ++it;
         }
     }
 
     // add new traces
     for (int i = 0; i < inNodes.size(); ++i) {
-        int outIndex = getMatched(edges, i);
+        auto in = &inNodes.at(i);
+        auto out = getMatched(edges, in);
         // node has edge and was not previously matched
-        if (outIndex >= 0 && !wasMatched.at(i)) {
-            activeTraces.emplace_back(
-                std::vector{inNodes.at(i), outNodes.at(outIndex)}, outIndex);
-        }
+        if (out && !wasMatched[in])
+            activeTraces.emplace_back(std::forward_list{in, out});
     }
 }
 
@@ -56,10 +55,10 @@ void Tracer::dumpToFile(const char filename[]) const {
     out.seekp(0);
     for (const auto &trace : traces) {
         for (const auto &point : trace.points)
-            out << point.x << " ";
+            out << point->x << " ";
         out << std::endl;
         for (const auto &point : trace.points)
-            out << point.y << " ";
+            out << point->y << " ";
         out << std::endl;
     }
     out.close();
